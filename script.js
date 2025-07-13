@@ -1,10 +1,11 @@
 // --- Constants ---
-const WIN_SCORE = 20;
-const TOTAL_TIME = 30;
-const DROP_INTERVAL = [500, 900]; // ms
+const DIFFICULTY_SETTINGS = {
+  easy:   { WIN_SCORE: 12, TOTAL_TIME: 40, DROP_INTERVAL: [700, 1100], MUD_CHANCE: 0.15 },
+  normal: { WIN_SCORE: 20, TOTAL_TIME: 30, DROP_INTERVAL: [500, 900],  MUD_CHANCE: 0.25 },
+  hard:   { WIN_SCORE: 28, TOTAL_TIME: 22, DROP_INTERVAL: [350, 700],  MUD_CHANCE: 0.35 }
+};
 const DROP_SIZE = [24, 48]; // px
-const DROP_SPEED = [3.5, 5]; // s  <-- increased duration
-const MUD_CHANCE = 0.25;
+const DROP_SPEED = [3.5, 5]; // s
 
 const WIN_MESSAGES = [
   "Amazing! You brought clean water to a village! 💧",
@@ -26,6 +27,7 @@ const scoreEl = document.getElementById('score');
 const timeEl = document.getElementById('time');
 const gameContainer = document.getElementById('gameContainer');
 const messageEl = document.getElementById('message');
+const difficultySel = document.getElementById('difficulty');
 
 // Progress bar (optional polish)
 let progressBar = null;
@@ -41,17 +43,32 @@ if (!document.getElementById('progressBar')) {
 }
 
 // --- State ---
+let difficulty = 'normal';
+let WIN_SCORE = DIFFICULTY_SETTINGS[difficulty].WIN_SCORE;
+let TOTAL_TIME = DIFFICULTY_SETTINGS[difficulty].TOTAL_TIME;
+let DROP_INTERVAL = DIFFICULTY_SETTINGS[difficulty].DROP_INTERVAL;
+let MUD_CHANCE = DIFFICULTY_SETTINGS[difficulty].MUD_CHANCE;
+
 let score = 0;
 let time = TOTAL_TIME;
 let timer = null;
 let dropSpawner = null;
 let running = false;
 
+// --- Milestone Messages ---
+const MILESTONES = [
+  { pct: 0.25, msg: "Great start! Keep going! 💪" },
+  { pct: 0.5,  msg: "Halfway there! 🚰" },
+  { pct: 0.75, msg: "Almost at your goal! 🌟" }
+];
+let shownMilestones = [];
+
 // --- Helpers ---
 function updateScore(val) {
   score = Math.max(0, val);
   scoreEl.textContent = score;
   updateProgress();
+  checkMilestones();
 }
 
 function updateTime(val) {
@@ -83,6 +100,21 @@ function pick(arr) {
 
 function clearDrops() {
   gameContainer.querySelectorAll('.drop').forEach(d => d.remove());
+}
+
+function checkMilestones() {
+  // Only show each milestone once per game
+  MILESTONES.forEach(milestone => {
+    const threshold = Math.ceil(WIN_SCORE * milestone.pct);
+    if (
+      score >= threshold &&
+      !shownMilestones.includes(milestone.pct) &&
+      score < WIN_SCORE // Don't show milestone if already won
+    ) {
+      showMessage(milestone.msg, false);
+      shownMilestones.push(milestone.pct);
+    }
+  });
 }
 
 // --- Drop Spawning ---
@@ -147,7 +179,13 @@ function startGame() {
   updateProgress();
   startBtn.disabled = true;
   resetBtn.disabled = false;
+  difficultySel.disabled = true;
+  shownMilestones = []; // Reset milestones for new game
   startSpawning();
+
+  // Play background audio
+  bgAudio.currentTime = 0;
+  bgAudio.play();
 
   timer = setInterval(() => {
     updateTime(time - 1);
@@ -164,6 +202,11 @@ function endGame() {
   setTimeout(clearDrops, 800);
   startBtn.disabled = false;
   resetBtn.disabled = false;
+  difficultySel.disabled = false;
+
+  // Pause background audio
+  bgAudio.pause();
+  bgAudio.currentTime = 0;
 
   if (score >= WIN_SCORE) {
     showMessage(pick(WIN_MESSAGES), true);
@@ -184,9 +227,42 @@ function resetGame() {
   updateProgress();
   startBtn.disabled = false;
   resetBtn.disabled = true;
+  difficultySel.disabled = false;
+  shownMilestones = []; // Reset milestones on reset
+
+  // Pause background audio
+  bgAudio.pause();
+  bgAudio.currentTime = 0;
+}
+
+// --- Background Audio ---
+const bgAudio = new Audio('img/game-intro-345507.mp3');
+bgAudio.loop = true;
+bgAudio.volume = 0.5; // Adjust volume as needed
+
+// --- Water Icon Click Sound ---
+const waterLogo = document.getElementById('waterLogo');
+const waterClickAudio = new Audio('img/water-click.mp3');
+waterClickAudio.volume = 0.7; // Adjust as needed
+
+if (waterLogo) {
+  waterLogo.addEventListener('click', () => {
+    // Restart sound if clicked rapidly
+    waterClickAudio.currentTime = 0;
+    waterClickAudio.play();
+  });
 }
 
 // --- Event Listeners ---
+difficultySel.addEventListener('change', (e) => {
+  difficulty = e.target.value;
+  WIN_SCORE = DIFFICULTY_SETTINGS[difficulty].WIN_SCORE;
+  TOTAL_TIME = DIFFICULTY_SETTINGS[difficulty].TOTAL_TIME;
+  DROP_INTERVAL = DIFFICULTY_SETTINGS[difficulty].DROP_INTERVAL;
+  MUD_CHANCE = DIFFICULTY_SETTINGS[difficulty].MUD_CHANCE;
+  resetGame();
+});
+
 startBtn.addEventListener('click', () => {
   if (!running) startGame();
 });

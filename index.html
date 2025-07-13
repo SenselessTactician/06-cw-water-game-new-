@@ -11,7 +11,7 @@
 <body>
   <header class="d-flex flex-column align-items-center">
     <div class="d-flex align-items-center mb-2">
-      <img src="img/water-can-transparent.png" alt="charity: water logo" style="height: 60px; width: auto;" />
+      <img id="waterLogo" src="img/water-can-transparent.png" alt="charity: water logo" style="height: 60px; width: auto;" />
       <span class="ms-2 fw-bold" style="font-size:1.5rem; color:#222; text-decoration: underline;">Charity: water</span>
     </div>
     <h1>Water Drop Game</h1>
@@ -19,6 +19,12 @@
   </header>
 
   <section id="controls" class="d-flex flex-wrap justify-content-center align-items-center">
+    <label for="difficulty" class="me-2 fw-bold">Difficulty:</label>
+    <select id="difficulty" class="form-select form-select-sm me-3" style="width:auto;">
+      <option value="easy">Easy</option>
+      <option value="normal" selected>Normal</option>
+      <option value="hard">Hard</option>
+    </select>
     <button id="startBtn" class="btn-cw me-2">Start</button>
     <button id="resetBtn" class="btn-cw" disabled>Reset</button>
     <div class="ms-3 fw-bold">⏱ <span id="time">30</span>s</div>
