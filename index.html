@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>charity: water – Water Drop Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
+</head>
+<body>
+  <header class="d-flex flex-column align-items-center">
+    <div class="d-flex align-items-center mb-2">
+      <img src="img/water-can-transparent.png" alt="charity: water logo" style="height: 60px; width: auto;" />
+      <span class="ms-2 fw-bold" style="font-size:1.5rem; color:#222; text-decoration: underline;">Charity: water</span>
+    </div>
+    <h1>Water Drop Game</h1>
+    <p class="tagline">Every drop brings hope. Play and help fund clean water!</p>
+  </header>
+
+  <section id="controls" class="d-flex flex-wrap justify-content-center align-items-center">
+    <button id="startBtn" class="btn-cw me-2">Start</button>
+    <button id="resetBtn" class="btn-cw" disabled>Reset</button>
+    <div class="ms-3 fw-bold">⏱ <span id="time">30</span>s</div>
+    <div class="ms-3 fw-bold">💧 <span id="score">0</span></div>
+  </section>
+
+  <main id="gameContainer"></main>
+  <div id="message"></div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
